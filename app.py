@@ -3,7 +3,7 @@ import telebot
 import requests
 from flask import Flask, request
 
-# CONFIGURAZIONE
+# Recupero variabili
 TOKEN = os.getenv("TOKEN_ANALYST")
 ANTHROPIC_KEY = os.getenv("ANTHROPIC_API_KEY")
 
@@ -18,15 +18,14 @@ def ask_claude(question):
         "content-type": "application/json"
     }
     data = {
-        "model": "claude-3-5-sonnet-20240620", # Il modello più potente e analitico
+        "model": "claude-3-5-sonnet-20240620",
         "max_tokens": 1024,
-        "system": "Sei l'Analista del Consiglio IA. Ricevi dati dal Sensor e devi fornire un'analisi critica, profonda e strategica. Non essere superficiale.",
-        "messages": [
-            {"role": "user", "content": question}
-        ]
+        "system": "Sei l'Analista del Consiglio IA. Il tuo compito è fornire analisi profonde, strategiche e critiche sui dati ricevuti. Non essere mai superficiale.",
+        "messages": [{"role": "user", "content": question}]
     }
     try:
         response = requests.post(url, headers=headers, json=data)
+        # Se Claude risponde correttamente, restituisce il testo
         return response.json()['content'][0]['text']
     except Exception as e:
         return f"Errore Claude: {str(e)}"
