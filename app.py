@@ -3,7 +3,7 @@ import telebot
 import requests
 from flask import Flask, request
 
-# Recupero variabili
+# CONFIGURAZIONE
 TOKEN = os.getenv("TOKEN_ANALYST")
 ANTHROPIC_KEY = os.getenv("ANTHROPIC_API_KEY")
 
@@ -20,15 +20,21 @@ def ask_claude(question):
     data = {
         "model": "claude-3-5-sonnet-20240620",
         "max_tokens": 1024,
-        "system": "Sei l'Analista del Consiglio IA. Il tuo compito è fornire analisi profonde, strategiche e critiche sui dati ricevuti. Non essere mai superficiale.",
+        "system": "Sei l'Analista del Consiglio IA. Fornisci analisi profonde.",
         "messages": [{"role": "user", "content": question}]
     }
     try:
         response = requests.post(url, headers=headers, json=data)
-        # Se Claude risponde correttamente, restituisce il testo
-        return response.json()['content'][0]['text']
+        res_json = response.json()
+        
+        if 'content' in res_json:
+            return res_json['content'][0]['text']
+        else:
+            # Ti restituisce il vero errore di Anthropic
+            error_msg = res_json.get('error', {}).get('message', 'Errore sconosciuto')
+            return f"Dettaglio Errore Anthropic: {error_msg}"
     except Exception as e:
-        return f"Errore Claude: {str(e)}"
+        return f"Errore Connessione: {str(e)}"
 
 @app.route('/webhook/analyst', methods=['POST'])
 def webhook():
